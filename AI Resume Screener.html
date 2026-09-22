@@ -1,0 +1,2870 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Scanline 2.0 — AI Resume Screener & Industry Skill Intelligence</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+/* ==========================================================================
+   THEME VARIABLES & DESIGN SYSTEM (OBSIDIAN / ELECTRIC AURORA)
+   ========================================================================== */
+:root {
+  --bg-primary: #080B11;
+  --bg-secondary: #0F1522;
+  --bg-tertiary: #161F32;
+  --panel: rgba(22, 31, 50, 0.7);
+  --panel-solid: #161F32;
+  --panel-border: rgba(99, 102, 241, 0.18);
+  --panel-border-subtle: rgba(255, 255, 255, 0.08);
+  --ink: #F1F5F9;
+  --ink-dim: #94A3B8;
+  --ink-faint: #64748B;
+  
+  --accent: #6366F1;         /* Electric Indigo */
+  --accent-glow: rgba(99, 102, 241, 0.35);
+  --accent-cyan: #06B6D4;    /* Luminous Cyan */
+  --accent-cyan-glow: rgba(6, 182, 212, 0.25);
+  --accent-violet: #8B5CF6;  /* Vivid Violet */
+  --accent-emerald: #10B981; /* Success Emerald */
+  --accent-amber: #F59E0B;   /* Warning Amber */
+  --accent-rose: #F43F5E;    /* Danger Rose */
+  
+  --ok-bg: rgba(16, 185, 129, 0.12);
+  --danger-bg: rgba(244, 63, 94, 0.12);
+  --info-bg: rgba(6, 182, 212, 0.12);
+  --purple-bg: rgba(139, 92, 246, 0.12);
+  
+  --font-display: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --radius-xs: 6px;
+  --radius-sm: 10px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+  --radius-full: 9999px;
+  
+  --glass-blur: blur(14px);
+  --shadow-card: 0 16px 36px -12px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--panel-border-subtle);
+  --shadow-glow: 0 0 25px -4px var(--accent-glow);
+}
+
+[data-theme="light"] {
+  --bg-primary: #F8FAFC;
+  --bg-secondary: #EFF4F9;
+  --bg-tertiary: #E2E8F0;
+  --panel: rgba(255, 255, 255, 0.85);
+  --panel-solid: #FFFFFF;
+  --panel-border: rgba(99, 102, 241, 0.22);
+  --panel-border-subtle: rgba(0, 0, 0, 0.08);
+  --ink: #0F172A;
+  --ink-dim: #475569;
+  --ink-faint: #94A3B8;
+  
+  --accent: #4F46E5;
+  --accent-glow: rgba(79, 70, 229, 0.25);
+  --accent-cyan: #0891B2;
+  --accent-cyan-glow: rgba(8, 145, 178, 0.2);
+  --accent-violet: #7C3AED;
+  --accent-emerald: #059669;
+  --accent-amber: #D97706;
+  --accent-rose: #E11D48;
+  
+  --ok-bg: rgba(5, 150, 105, 0.09);
+  --danger-bg: rgba(225, 29, 72, 0.08);
+  --info-bg: rgba(8, 145, 178, 0.09);
+  --purple-bg: rgba(124, 58, 237, 0.08);
+  --shadow-card: 0 12px 30px -10px rgba(15, 23, 42, 0.08), 0 0 0 1px rgba(0, 0, 0, 0.05);
+}
+
+/* ==========================================================================
+   RESET & BASE STYLES
+   ========================================================================== */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; }
+body {
+  margin: 0;
+  background: var(--bg-primary);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 15px;
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+  background-image: 
+    radial-gradient(circle at 18% 12%, color-mix(in srgb, var(--accent) 14%, transparent) 0%, transparent 45%),
+    radial-gradient(circle at 82% 40%, color-mix(in srgb, var(--accent-cyan) 10%, transparent) 0%, transparent 40%),
+    radial-gradient(circle at 50% 88%, color-mix(in srgb, var(--accent-violet) 8%, transparent) 0%, transparent 50%);
+  background-attachment: fixed;
+  min-height: 100vh;
+}
+
+.wrap { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+a { color: inherit; text-decoration: none; }
+button { font-family: inherit; }
+
+/* ==========================================================================
+   NAVBAR & AUTH HEADER
+   ========================================================================== */
+header.nav {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  backdrop-filter: var(--glass-blur);
+  background: color-mix(in srgb, var(--bg-primary) 78%, transparent);
+  border-bottom: 1px solid var(--panel-border-subtle);
+  transition: all 0.2s ease;
+}
+
+.nav-inner {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 14px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.25rem;
+  letter-spacing: -0.3px;
+  cursor: pointer;
+}
+
+.brand-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: var(--radius-sm);
+  background: linear-gradient(135deg, var(--accent), var(--accent-cyan));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1.1rem;
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+.brand-tag {
+  font-family: var(--font-mono);
+  font-size: 0.68rem;
+  padding: 2px 7px;
+  border-radius: var(--radius-full);
+  background: var(--purple-bg);
+  color: var(--accent-violet);
+  border: 1px solid color-mix(in srgb, var(--accent-violet) 30%, transparent);
+  font-weight: 600;
+  margin-left: -2px;
+}
+
+nav.links {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  font-size: 0.92rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+}
+
+nav.links a { transition: color 0.15s ease; }
+nav.links a:hover { color: var(--ink); }
+
+.nav-right {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+/* Theme Toggle Button */
+.btn-theme {
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border-subtle);
+  color: var(--ink);
+  width: 38px;
+  height: 38px;
+  border-radius: var(--radius-sm);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-theme:hover {
+  border-color: var(--accent);
+  transform: translateY(-1px);
+}
+
+/* Auth Profile / Login Button */
+.btn-auth-trigger {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.88rem;
+  background: linear-gradient(135deg, var(--accent), var(--accent-violet));
+  color: #FFFFFF;
+  border: none;
+  padding: 9px 18px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+.btn-auth-trigger:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px var(--accent-glow);
+}
+
+.user-profile-menu {
+  position: relative;
+  display: none;
+}
+.user-profile-menu.active { display: flex; }
+
+.user-avatar-btn {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border);
+  padding: 5px 12px 5px 6px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.user-avatar-btn:hover { border-color: var(--accent-cyan); }
+.user-avatar-circle {
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--accent-cyan), var(--accent));
+  color: white;
+  font-weight: 700;
+  font-size: 0.8rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.user-name-text {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+}
+.user-role-badge {
+  font-family: var(--font-mono);
+  font-size: 0.65rem;
+  background: var(--purple-bg);
+  color: var(--accent-violet);
+  padding: 2px 6px;
+  border-radius: var(--radius-full);
+}
+
+.profile-dropdown {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  width: 250px;
+  background: var(--panel-solid);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-card);
+  padding: 14px;
+  display: none;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 60;
+  animation: fadeInDown 0.2s ease forwards;
+}
+.profile-dropdown.open { display: flex; }
+
+.profile-header-info {
+  border-bottom: 1px solid var(--panel-border-subtle);
+  padding-bottom: 10px;
+}
+.profile-email {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.dropdown-item {
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 8px 10px;
+  border-radius: var(--radius-xs);
+  color: var(--ink);
+  font-size: 0.85rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: background 0.15s ease;
+}
+.dropdown-item:hover { background: var(--bg-secondary); }
+.dropdown-item.danger { color: var(--accent-rose); }
+.dropdown-item.danger:hover { background: var(--danger-bg); }
+
+/* ==========================================================================
+   AUTH MODAL & DEMO CREDENTIALS
+   ========================================================================== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(4, 7, 13, 0.75);
+  backdrop-filter: blur(8px);
+  z-index: 100;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-backdrop.active { display: flex; }
+
+.auth-modal {
+  background: var(--panel-solid);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  width: 100%;
+  max-width: 480px;
+  box-shadow: var(--shadow-card), 0 0 35px var(--accent-glow);
+  overflow: hidden;
+  position: relative;
+  animation: scaleUp 0.25s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+@keyframes scaleUp {
+  from { opacity: 0; transform: scale(0.96) translateY(10px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+@keyframes fadeInDown {
+  from { opacity: 0; transform: translateY(-8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.modal-head {
+  padding: 24px 28px 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  border-bottom: 1px solid var(--panel-border-subtle);
+}
+.modal-title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 1.35rem;
+  margin: 0 0 4px;
+}
+.modal-sub {
+  color: var(--ink-dim);
+  font-size: 0.85rem;
+  margin: 0;
+}
+.modal-close {
+  background: none;
+  border: none;
+  color: var(--ink-dim);
+  font-size: 1.4rem;
+  cursor: pointer;
+  line-height: 1;
+  padding: 4px;
+  border-radius: var(--radius-xs);
+}
+.modal-close:hover { color: var(--ink); }
+
+.auth-body { padding: 24px 28px; }
+
+/* Demo credentials quick pick cards */
+.demo-accounts-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  padding: 14px;
+  margin-bottom: 20px;
+}
+.demo-badge-title {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--accent-cyan);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 10px;
+}
+.demo-chips {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.btn-demo-fill {
+  background: var(--panel-solid);
+  border: 1px solid var(--panel-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 9px 12px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  color: var(--ink);
+}
+.btn-demo-fill:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 8%, var(--panel-solid));
+  transform: translateY(-1px);
+}
+.btn-demo-fill b { display: block; font-size: 0.82rem; }
+.btn-demo-fill span { font-size: 0.72rem; color: var(--ink-dim); font-family: var(--font-mono); }
+
+.auth-tabs {
+  display: flex;
+  background: var(--bg-secondary);
+  padding: 4px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 18px;
+  border: 1px solid var(--panel-border-subtle);
+}
+.auth-tab {
+  flex: 1;
+  background: transparent;
+  border: none;
+  padding: 8px;
+  border-radius: var(--radius-xs);
+  color: var(--ink-dim);
+  font-weight: 600;
+  font-size: 0.85rem;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.auth-tab.active {
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 2px 8px var(--accent-glow);
+}
+
+.auth-input-group { margin-bottom: 14px; }
+.auth-input-group label {
+  display: block;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--ink-dim);
+  margin-bottom: 6px;
+}
+.auth-input-wrap { position: relative; }
+.auth-input {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: 10px 14px;
+  transition: all 0.15s ease;
+}
+.auth-input:focus {
+  outline: none;
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.toggle-pwd {
+  position: absolute;
+  right: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: none;
+  border: none;
+  color: var(--ink-faint);
+  cursor: pointer;
+  font-size: 0.85rem;
+}
+
+.auth-status-msg {
+  font-size: 0.8rem;
+  padding: 8px 12px;
+  border-radius: var(--radius-xs);
+  margin-bottom: 12px;
+  display: none;
+}
+.auth-status-msg.error {
+  display: block;
+  background: var(--danger-bg);
+  color: var(--accent-rose);
+  border: 1px solid color-mix(in srgb, var(--accent-rose) 30%, transparent);
+}
+.auth-status-msg.success {
+  display: block;
+  background: var(--ok-bg);
+  color: var(--accent-emerald);
+  border: 1px solid color-mix(in srgb, var(--accent-emerald) 30%, transparent);
+}
+
+.btn-auth-submit {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-cyan));
+  color: white;
+  border: none;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 16px var(--accent-glow);
+}
+.btn-auth-submit:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 24px var(--accent-glow);
+}
+
+/* ==========================================================================
+   HERO SECTION
+   ========================================================================== */
+.hero {
+  padding: 68px 0 48px;
+  position: relative;
+}
+
+.hero-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 0.85fr;
+  gap: 48px;
+  align-items: center;
+}
+@media (max-width: 960px) {
+  .hero-grid { grid-template-columns: 1fr; }
+}
+
+.hero-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 32%, transparent);
+  color: var(--accent-cyan);
+  padding: 5px 14px;
+  border-radius: var(--radius-full);
+  font-size: 0.78rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  margin-bottom: 20px;
+}
+.hero-pill-pulse {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent-cyan);
+  box-shadow: 0 0 10px var(--accent-cyan);
+  animation: radarPulse 2s infinite;
+}
+@keyframes radarPulse {
+  0% { transform: scale(0.95); opacity: 0.9; }
+  50% { transform: scale(1.3); opacity: 0.4; }
+  100% { transform: scale(0.95); opacity: 0.9; }
+}
+
+h1.hero-title {
+  font-family: var(--font-display);
+  font-size: clamp(2.3rem, 4.2vw, 3.4rem);
+  line-height: 1.12;
+  font-weight: 700;
+  margin: 0 0 20px;
+  letter-spacing: -0.8px;
+}
+.gradient-text {
+  background: linear-gradient(135deg, var(--ink) 30%, var(--accent-cyan) 80%, var(--accent) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.hero-desc {
+  color: var(--ink-dim);
+  font-size: 1.06rem;
+  line-height: 1.65;
+  margin: 0 0 32px;
+  max-width: 52ch;
+}
+
+.hero-actions {
+  display: flex;
+  gap: 14px;
+  flex-wrap: wrap;
+}
+.btn-primary {
+  background: linear-gradient(135deg, var(--accent), var(--accent-cyan));
+  color: #FFFFFF;
+  border: none;
+  font-weight: 600;
+  font-size: 0.96rem;
+  padding: 13px 26px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 6px 20px var(--accent-glow);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 28px var(--accent-glow);
+}
+.btn-secondary {
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border-subtle);
+  color: var(--ink);
+  font-weight: 600;
+  font-size: 0.96rem;
+  padding: 13px 22px;
+  border-radius: var(--radius-sm);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.btn-secondary:hover {
+  border-color: var(--accent);
+  background: var(--bg-tertiary);
+}
+
+.hero-badges {
+  display: flex;
+  gap: 28px;
+  margin-top: 38px;
+  padding-top: 26px;
+  border-top: 1px solid var(--panel-border-subtle);
+}
+.hero-badge-item b {
+  display: block;
+  font-family: var(--font-display);
+  font-size: 1.55rem;
+  font-weight: 700;
+  color: var(--ink);
+}
+.hero-badge-item span {
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+}
+
+/* Hero Interactive Radar Card */
+.hero-radar-card {
+  background: var(--panel);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-lg);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+  position: relative;
+  overflow: hidden;
+}
+.hero-radar-card::before {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -50%;
+  width: 100%;
+  height: 100%;
+  background: radial-gradient(circle, var(--accent-glow) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-scanner-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, var(--accent-cyan), var(--accent), transparent);
+  box-shadow: 0 0 16px var(--accent-cyan);
+  animation: scanSweep 3.6s ease-in-out infinite alternate;
+}
+@keyframes scanSweep {
+  0% { top: 0%; }
+  100% { top: 96%; }
+}
+.card-header-meta {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  color: var(--ink-faint);
+  margin-bottom: 16px;
+}
+.radar-skill-preview {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 16px 0;
+}
+.chip-live {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 5px 11px;
+  border-radius: var(--radius-full);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.chip-live.match {
+  background: var(--ok-bg);
+  color: var(--accent-emerald);
+  border: 1px solid color-mix(in srgb, var(--accent-emerald) 30%, transparent);
+}
+.chip-live.trending {
+  background: var(--purple-bg);
+  color: var(--accent-violet);
+  border: 1px solid color-mix(in srgb, var(--accent-violet) 30%, transparent);
+}
+.chip-live.soft {
+  background: var(--info-bg);
+  color: var(--accent-cyan);
+  border: 1px solid color-mix(in srgb, var(--accent-cyan) 30%, transparent);
+}
+
+/* ==========================================================================
+   INDUSTRY BENCHMARK EXPLORER (PROFESSIONS & SKILLS)
+   ========================================================================== */
+section.industry-insights {
+  padding: 60px 0;
+  background: color-mix(in srgb, var(--bg-secondary) 50%, transparent);
+  border-top: 1px solid var(--panel-border-subtle);
+  border-bottom: 1px solid var(--panel-border-subtle);
+}
+
+.section-intro {
+  text-align: center;
+  max-width: 680px;
+  margin: 0 auto 40px;
+}
+.section-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--accent-cyan);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  margin-bottom: 8px;
+  display: block;
+}
+.section-intro h2 {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.8vw, 2.2rem);
+  font-weight: 700;
+  margin: 0 0 12px;
+  letter-spacing: -0.4px;
+}
+.section-intro p {
+  color: var(--ink-dim);
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+/* Profession Selector Tabs */
+.profession-nav {
+  display: flex;
+  gap: 10px;
+  overflow-x: auto;
+  padding-bottom: 12px;
+  margin-bottom: 28px;
+  scrollbar-width: thin;
+}
+.btn-prof-tab {
+  background: var(--panel-solid);
+  border: 1px solid var(--panel-border-subtle);
+  color: var(--ink-dim);
+  padding: 10px 18px;
+  border-radius: var(--radius-full);
+  font-size: 0.86rem;
+  font-weight: 600;
+  cursor: pointer;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.btn-prof-tab:hover {
+  border-color: var(--accent);
+  color: var(--ink);
+}
+.btn-prof-tab.active {
+  background: linear-gradient(135deg, var(--accent), var(--accent-violet));
+  color: #fff;
+  border-color: transparent;
+  box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+/* Profession Intelligence Grid */
+.prof-intel-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 24px;
+}
+@media (max-width: 860px) {
+  .prof-intel-grid { grid-template-columns: 1fr; }
+}
+
+.intel-card {
+  background: var(--panel);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  padding: 24px;
+  box-shadow: var(--shadow-card);
+}
+.intel-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+  border-bottom: 1px solid var(--panel-border-subtle);
+  padding-bottom: 12px;
+}
+.intel-card-header h3 {
+  font-family: var(--font-display);
+  font-size: 1.05rem;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.intel-badge {
+  font-family: var(--font-mono);
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-full);
+  background: var(--info-bg);
+  color: var(--accent-cyan);
+}
+
+.skills-pill-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 20px;
+}
+.skill-pill {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  padding: 5px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border-subtle);
+  color: var(--ink);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.skill-pill .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+}
+.skill-pill.core .dot { background: var(--accent-cyan); }
+.skill-pill.trending .dot { background: var(--accent-violet); }
+.skill-pill.soft .dot { background: var(--accent-emerald); }
+
+.advice-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.advice-item {
+  display: flex;
+  gap: 12px;
+  font-size: 0.88rem;
+  color: var(--ink-dim);
+  line-height: 1.5;
+}
+.advice-item .icon {
+  flex-shrink: 0;
+  color: var(--accent-cyan);
+  font-weight: 700;
+  font-family: var(--font-mono);
+}
+
+/* Bullet rewrite card */
+.rewrite-comparison {
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 14px;
+  margin-top: 14px;
+}
+.rewrite-comparison .label-weak {
+  color: var(--accent-rose);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-bottom: 4px;
+}
+.rewrite-comparison .label-strong {
+  color: var(--accent-emerald);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  font-weight: 600;
+  margin-top: 10px;
+  margin-bottom: 4px;
+}
+.rewrite-text {
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--ink);
+}
+
+/* ==========================================================================
+   SCREENER WORKSPACE (UPLOAD & ANALYSIS)
+   ========================================================================== */
+#screen {
+  padding: 72px 0 90px;
+}
+
+.screener-layout {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 32px;
+  align-items: start;
+}
+@media (max-width: 960px) {
+  .screener-layout { grid-template-columns: 1fr; }
+}
+
+.panel-card {
+  background: var(--panel);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--panel-border);
+  border-radius: var(--radius-md);
+  padding: 28px;
+  box-shadow: var(--shadow-card);
+}
+
+.panel-card h3 {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+/* Dropzone */
+.dropzone-box {
+  border: 2px dashed color-mix(in srgb, var(--accent) 35%, var(--panel-border-subtle));
+  border-radius: var(--radius-md);
+  padding: 34px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: color-mix(in srgb, var(--bg-secondary) 60%, transparent);
+  margin-bottom: 18px;
+}
+.dropzone-box:hover, .dropzone-box.drag-active {
+  border-color: var(--accent-cyan);
+  background: color-mix(in srgb, var(--accent) 6%, transparent);
+  transform: translateY(-1px);
+}
+.drop-icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 12px;
+  color: var(--accent-cyan);
+  font-size: 1.3rem;
+}
+.drop-main-text {
+  font-weight: 600;
+  font-size: 0.95rem;
+  margin: 0 0 4px;
+  color: var(--ink);
+}
+.drop-sub-text {
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+  margin: 0;
+  font-family: var(--font-mono);
+}
+
+.quick-sample-loader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 10px 14px;
+  margin-bottom: 20px;
+}
+.quick-sample-loader span {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+}
+.btn-sample-load {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 40%, transparent);
+  color: var(--accent-cyan);
+  font-size: 0.75rem;
+  font-family: var(--font-mono);
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.btn-sample-load:hover {
+  background: var(--accent);
+  color: white;
+}
+
+/* File Ready Badge */
+.file-uploaded-info {
+  display: none;
+  align-items: center;
+  gap: 12px;
+  background: color-mix(in srgb, var(--accent) 10%, var(--bg-secondary));
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-sm);
+  padding: 12px 16px;
+  margin-bottom: 20px;
+}
+.file-uploaded-info.active { display: flex; }
+.file-meta-icon {
+  color: var(--accent-cyan);
+  font-size: 1.3rem;
+}
+.file-meta-details {
+  flex: 1;
+  overflow: hidden;
+}
+.file-name-line {
+  font-weight: 600;
+  font-size: 0.88rem;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+.file-size-line {
+  font-size: 0.74rem;
+  color: var(--ink-dim);
+  font-family: var(--font-mono);
+}
+.btn-file-remove {
+  background: none;
+  border: none;
+  color: var(--ink-dim);
+  cursor: pointer;
+  font-size: 1.1rem;
+  padding: 4px;
+}
+.btn-file-remove:hover { color: var(--accent-rose); }
+
+/* Form Fields */
+.input-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-bottom: 14px;
+}
+@media (max-width: 540px) {
+  .input-row { grid-template-columns: 1fr; }
+}
+
+.input-field { margin-bottom: 14px; }
+.input-field label {
+  display: block;
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: var(--ink-dim);
+  margin-bottom: 6px;
+}
+.input-field input, .input-field select, .input-field textarea {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border-subtle);
+  border-radius: var(--radius-sm);
+  color: var(--ink);
+  font-family: var(--font-body);
+  font-size: 0.9rem;
+  padding: 10px 14px;
+  transition: all 0.15s ease;
+}
+.input-field input:focus, .input-field select:focus, .input-field textarea:focus {
+  outline: none;
+  border-color: var(--accent-cyan);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent-cyan) 15%, transparent);
+}
+.input-field textarea {
+  min-height: 80px;
+  resize: vertical;
+}
+
+.btn-screen-action {
+  width: 100%;
+  background: linear-gradient(135deg, var(--accent), var(--accent-cyan));
+  color: white;
+  border: none;
+  padding: 14px;
+  border-radius: var(--radius-sm);
+  font-weight: 700;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 18px var(--accent-glow);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  margin-top: 8px;
+}
+.btn-screen-action:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 26px var(--accent-glow);
+}
+.btn-screen-action:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+/* Progress bar */
+.screen-progress {
+  display: none;
+  margin-top: 18px;
+}
+.screen-progress.active { display: block; }
+.progress-track {
+  height: 6px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  border: 1px solid var(--panel-border-subtle);
+  margin-bottom: 8px;
+}
+.progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent), var(--accent-cyan), var(--accent-violet));
+  transition: width 0.35s ease;
+}
+.progress-status-text {
+  font-family: var(--font-mono);
+  font-size: 0.78rem;
+  color: var(--accent-cyan);
+  text-align: center;
+}
+
+/* ==========================================================================
+   RESULTS DASHBOARD
+   ========================================================================== */
+#results-view {
+  display: none;
+  animation: fadeIn 0.4s ease forwards;
+}
+#results-view.active { display: block; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.idle-report-state {
+  text-align: center;
+  padding: 60px 20px;
+  color: var(--ink-faint);
+}
+.idle-report-state .idle-icon {
+  font-size: 2.5rem;
+  margin-bottom: 12px;
+  opacity: 0.6;
+}
+
+.score-hero-box {
+  text-align: center;
+  padding: 24px 16px;
+  background: var(--bg-secondary);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--panel-border);
+  margin-bottom: 20px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Radial Meter */
+.radial-meter {
+  position: relative;
+  width: 160px;
+  height: 160px;
+  margin: 0 auto 12px;
+}
+.radial-meter svg { transform: rotate(-90deg); }
+.radial-meter circle { fill: none; stroke-width: 12; }
+.radial-meter .track { stroke: color-mix(in srgb, var(--ink-faint) 20%, transparent); }
+.radial-meter .meter-fill {
+  stroke: var(--accent-cyan);
+  stroke-linecap: round;
+  transition: stroke-dashoffset 1.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+.radial-inner-content {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.score-big-num {
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+  line-height: 1;
+  color: var(--ink);
+}
+.score-sub-label {
+  font-size: 0.68rem;
+  text-transform: uppercase;
+  font-family: var(--font-mono);
+  color: var(--ink-dim);
+  margin-top: 4px;
+}
+
+.score-verdict-title {
+  font-family: var(--font-display);
+  font-size: 1.15rem;
+  font-weight: 700;
+  margin: 0 0 6px;
+}
+.score-verdict-desc {
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+  margin: 0;
+  max-width: 38ch;
+  margin: 0 auto;
+}
+
+.candidate-summary-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 20px;
+  font-size: 0.86rem;
+}
+.candidate-summary-table td {
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--panel-border-subtle);
+}
+.candidate-summary-table td:first-child {
+  color: var(--ink-faint);
+  font-weight: 500;
+  width: 35%;
+}
+.candidate-summary-table td:last-child {
+  font-family: var(--font-mono);
+  color: var(--ink);
+  text-align: right;
+}
+
+/* Tabs inside Results */
+.result-tabs {
+  display: flex;
+  gap: 8px;
+  border-bottom: 1px solid var(--panel-border-subtle);
+  padding-bottom: 12px;
+  margin-bottom: 18px;
+}
+.res-tab-btn {
+  background: none;
+  border: none;
+  color: var(--ink-dim);
+  font-weight: 600;
+  font-size: 0.85rem;
+  padding: 6px 12px;
+  border-radius: var(--radius-xs);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.res-tab-btn.active {
+  background: var(--bg-secondary);
+  color: var(--accent-cyan);
+}
+
+.checklist-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+@media (max-width: 500px) {
+  .checklist-grid { grid-template-columns: 1fr; }
+}
+.check-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.82rem;
+  padding: 8px 12px;
+  border-radius: var(--radius-xs);
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border-subtle);
+}
+.check-item.pass { color: var(--ink); }
+.check-item.fail { color: var(--ink-faint); opacity: 0.75; }
+.check-icon-pass { color: var(--accent-emerald); font-weight: 700; }
+.check-icon-fail { color: var(--accent-rose); font-weight: 700; }
+
+.skill-tag-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 18px;
+}
+.res-tag {
+  font-family: var(--font-mono);
+  font-size: 0.75rem;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+}
+.res-tag.found {
+  background: var(--ok-bg);
+  color: var(--accent-emerald);
+  border: 1px solid color-mix(in srgb, var(--accent-emerald) 30%, transparent);
+}
+.res-tag.missing {
+  background: var(--danger-bg);
+  color: var(--accent-rose);
+  border: 1px solid color-mix(in srgb, var(--accent-rose) 30%, transparent);
+}
+.res-tag.trending-gap {
+  background: var(--purple-bg);
+  color: var(--accent-violet);
+  border: 1px solid color-mix(in srgb, var(--accent-violet) 30%, transparent);
+}
+.res-tag.soft-detected {
+  background: var(--info-bg);
+  color: var(--accent-cyan);
+  border: 1px solid color-mix(in srgb, var(--accent-cyan) 30%, transparent);
+}
+
+.recommendations-box {
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border-subtle);
+  border-radius: var(--radius-sm);
+  padding: 16px;
+}
+.rec-title {
+  font-size: 0.82rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: var(--accent-cyan);
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.rec-bullet-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.rec-bullet-list li {
+  font-size: 0.85rem;
+  color: var(--ink);
+  line-height: 1.5;
+  display: flex;
+  gap: 8px;
+}
+.rec-bullet-list li::before {
+  content: '⚡';
+  font-size: 0.8rem;
+  color: var(--accent-cyan);
+}
+
+.btn-print-report {
+  width: 100%;
+  background: var(--bg-secondary);
+  border: 1px solid var(--panel-border);
+  color: var(--ink);
+  padding: 10px;
+  border-radius: var(--radius-sm);
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  margin-top: 16px;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn-print-report:hover { border-color: var(--accent); }
+
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
+footer {
+  border-top: 1px solid var(--panel-border-subtle);
+  padding: 40px 0;
+  background: var(--bg-primary);
+  color: var(--ink-faint);
+  font-size: 0.82rem;
+}
+.footer-content {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+/* Print optimizations */
+@media print {
+  header.nav, .hero, .industry-insights, .screener-layout > div:first-child, footer, .btn-print-report, .result-tabs {
+    display: none !important;
+  }
+  body { background: white !important; color: black !important; }
+  .panel-card, .score-hero-box, .intel-card {
+    border: 1px solid #ccc !important;
+    background: white !important;
+    box-shadow: none !important;
+  }
+  #results-view { display: block !important; }
+}
+</style>
+</head>
+<body>
+
+<!-- ==========================================================================
+     NAVBAR
+     ========================================================================== */
+-->
+<header class="nav">
+  <div class="nav-inner">
+    <div class="brand" onclick="window.scrollTo({top:0, behavior:'smooth'})">
+      <div class="brand-icon">⚡</div>
+      <span>Scanline</span>
+      <span class="brand-tag">2.0 AI</span>
+    </div>
+
+    <nav class="links">
+      <a href="#industry-benchmarks">Industry Skills</a>
+      <a href="#screen">Resume Screener</a>
+      <a href="#how-it-works">How It Works</a>
+    </nav>
+
+    <div class="nav-right">
+      <!-- Theme Switcher -->
+      <button class="btn-theme" id="themeToggleBtn" title="Toggle Light/Dark Theme">
+        <span id="themeIcon">☀️</span>
+      </button>
+
+      <!-- Auth State Button (when logged out) -->
+      <button class="btn-auth-trigger" id="authOpenBtn">
+        <span>Sign In</span>
+      </button>
+
+      <!-- User Profile Menu (when logged in) -->
+      <div class="user-profile-menu" id="userProfileMenu">
+        <button class="user-avatar-btn" id="userDropdownTrigger">
+          <div class="user-avatar-circle" id="userAvatarText">SJ</div>
+          <span class="user-name-text" id="userNameHeader">Sarah Jenkins</span>
+          <span class="user-role-badge" id="userRoleHeader">Recruiter</span>
+          <span style="font-size: 0.7rem;">▼</span>
+        </button>
+
+        <div class="profile-dropdown" id="profileDropdown">
+          <div class="profile-header-info">
+            <div style="font-weight: 700; font-size: 0.9rem;" id="dropdownFullName">Sarah Jenkins</div>
+            <div class="profile-email" id="dropdownEmail">recruiter@scanline.ai</div>
+          </div>
+          <button class="dropdown-item" onclick="switchUserPersona('candidate')">
+            <span>🔄 Switch to Candidate Demo</span>
+          </button>
+          <button class="dropdown-item" onclick="switchUserPersona('recruiter')">
+            <span>💼 Switch to Recruiter Demo</span>
+          </button>
+          <button class="dropdown-item danger" id="btnLogout">
+            <span>🚪 Sign Out</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>
+
+<!-- ==========================================================================
+     AUTH MODAL (LOGIN & DEMO CREDENTIALS)
+     ========================================================================== */
+-->
+<div class="modal-backdrop" id="authModal">
+  <div class="auth-modal">
+    <div class="modal-head">
+      <div>
+        <h3 class="modal-title" id="authModalTitle">Welcome to Scanline</h3>
+        <p class="modal-sub">Sign in to sync your candidate pipeline & skill insights</p>
+      </div>
+      <button class="modal-close" id="authModalClose">✕</button>
+    </div>
+
+    <div class="auth-body">
+      <!-- 1-Click Demo Accounts Quick Selector -->
+      <div class="demo-accounts-box">
+        <div class="demo-badge-title">⚡ Fast 1-Click Demo Credentials</div>
+        <div class="demo-chips">
+          <button class="btn-demo-fill" id="btnFillRecruiter">
+            <b>🏢 Recruiter Pro</b>
+            <span>recruiter@scanline.ai</span>
+          </button>
+          <button class="btn-demo-fill" id="btnFillCandidate">
+            <b>👤 Tech Candidate</b>
+            <span>alex.chen@scanline.ai</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tabSignIn">Sign In</button>
+        <button class="auth-tab" id="tabSignUp">Create Account</button>
+      </div>
+
+      <form id="authForm">
+        <div class="auth-input-group" id="groupName" style="display: none;">
+          <label for="inputName">Full Name</label>
+          <input type="text" id="inputName" class="auth-input" placeholder="e.g. Maya Lin">
+        </div>
+
+        <div class="auth-input-group">
+          <label for="inputEmail">Email Address</label>
+          <input type="email" id="inputEmail" class="auth-input" placeholder="name@company.com" required value="recruiter@scanline.ai">
+        </div>
+
+        <div class="auth-input-group">
+          <label for="inputPassword">Password</label>
+          <div class="auth-input-wrap">
+            <input type="password" id="inputPassword" class="auth-input" placeholder="••••••••" required value="recruiter123">
+            <button type="button" class="toggle-pwd" id="btnTogglePwd" title="Show/Hide password">👁️</button>
+          </div>
+        </div>
+
+        <div class="auth-status-msg" id="authMsg"></div>
+
+        <button type="submit" class="btn-auth-submit" id="btnSubmitAuth">Sign In to Dashboard</button>
+      </form>
+
+      <div style="text-align: center; margin-top: 14px;">
+        <button type="button" id="btnGuestContinue" style="background:none; border:none; color:var(--ink-faint); font-size:0.78rem; text-decoration:underline; cursor:pointer;">
+          Continue screening as Guest (No sign in needed)
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ==========================================================================
+     HERO SECTION
+     ========================================================================== */
+-->
+<section class="hero">
+  <div class="wrap hero-grid">
+    <div>
+      <div class="hero-pill">
+        <span class="hero-pill-pulse"></span>
+        <span>2025/2026 Industry Skill Intelligence & Screening Engine</span>
+      </div>
+
+      <h1 class="hero-title">
+        See the actual talent inside the resume with <span class="gradient-text">Precision AI.</span>
+      </h1>
+
+      <p class="hero-desc">
+        Benchmark candidate profiles against today's real industry demands. Automatically extract skills, detect missing high-growth competencies, and receive profession-tailored recommendations.
+      </p>
+
+      <div class="hero-actions">
+        <a href="#screen" class="btn-primary">
+          <span>⚡ Screen a Resume Now</span>
+        </a>
+        <a href="#industry-benchmarks" class="btn-secondary">
+          <span>Explore Industry Benchmarks</span>
+        </a>
+      </div>
+
+      <div class="hero-badges">
+        <div class="hero-badge-item">
+          <b>8+</b>
+          <span>Key Tech Roles</span>
+        </div>
+        <div class="hero-badge-item">
+          <b>160+</b>
+          <span>Industry Skills Indexed</span>
+        </div>
+        <div class="hero-badge-item">
+          <b>100%</b>
+          <span>Client-Side Privacy</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live Scanner Simulation Card -->
+    <div class="hero-radar-card">
+      <div class="hero-scanner-line"></div>
+      <div class="card-header-meta">
+        <span>LIVE PIPELINE RADAR</span>
+        <span style="color:var(--accent-emerald)">● ACTIVE</span>
+      </div>
+      <div style="font-family:var(--font-display); font-weight:700; font-size:1.1rem; margin-bottom:4px;">
+        Senior Full Stack / AI Engineer
+      </div>
+      <div style="font-size:0.8rem; color:var(--ink-dim); font-family:var(--font-mono);">
+        Extracting candidate keywords vs. 2026 Tech & Soft Skill benchmarks...
+      </div>
+
+      <div class="radar-skill-preview">
+        <span class="chip-live match">✓ Python & TypeScript</span>
+        <span class="chip-live match">✓ FastAPI Microservices</span>
+        <span class="chip-live trending">★ GenAI / RAG Architecture</span>
+        <span class="chip-live soft">⚡ Stakeholder Alignment</span>
+        <span class="chip-live trending">★ Vector DBs (Qdrant)</span>
+        <span class="chip-live soft">⚡ Cross-Functional Leadership</span>
+      </div>
+
+      <div style="background:var(--bg-secondary); border-radius:var(--radius-sm); padding:12px; margin-top:14px; border:1px solid var(--panel-border-subtle);">
+        <div style="display:flex; justify-content:space-between; font-size:0.75rem; font-family:var(--font-mono); margin-bottom:6px;">
+          <span>ATS Keyword Match Density</span>
+          <span style="color:var(--accent-cyan); font-weight:600;">88%</span>
+        </div>
+        <div style="height:6px; background:var(--bg-primary); border-radius:10px; overflow:hidden;">
+          <div style="width:88%; height:100%; background:linear-gradient(90deg, var(--accent), var(--accent-cyan));"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================================================
+     INDUSTRY SKILLS BENCHMARKS & PROFESSION ADVICE
+     ========================================================================== */
+-->
+<section id="industry-benchmarks" class="industry-insights">
+  <div class="wrap">
+    <div class="section-intro">
+      <span class="section-tag">Industry Standards Matrix</span>
+      <h2>Current Technical & Soft Skills Required in Top Industries</h2>
+      <p>
+        Hiring standards evolve rapidly. Explore what top engineering organizations, startups, and enterprises expect for each key profession in 2025/2026.
+      </p>
+    </div>
+
+    <!-- Profession Selection Tabs -->
+    <div class="profession-nav" id="profTabContainer"></div>
+
+    <!-- Dynamic Profession Intelligence Display -->
+    <div class="prof-intel-grid" id="profIntelDisplay"></div>
+  </div>
+</section>
+
+<!-- ==========================================================================
+     SCREENER WORKSPACE SECTION
+     ========================================================================== */
+-->
+<section id="screen">
+  <div class="wrap">
+    <div class="section-intro" style="text-align: left; margin-bottom: 28px;">
+      <span class="section-tag">Interactive AI Screener</span>
+      <h2>Screen a Resume Against Industry Roles</h2>
+      <p>Upload a resume in PDF, Word DOCX, or TXT format. Everything is parsed completely within your browser.</p>
+    </div>
+
+    <div class="screener-layout">
+      <!-- Left Panel: Input, Upload & Role Selector -->
+      <div class="panel-card">
+        <h3>
+          <span>1. Candidate & Target Role</span>
+          <span style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--accent-cyan); font-weight: normal;">Step 1 of 2</span>
+        </h3>
+
+        <!-- Dropzone -->
+        <div class="dropzone-box" id="dropzoneBox">
+          <div class="drop-icon">📁</div>
+          <p class="drop-main-text">Click to browse or drop resume file</p>
+          <p class="drop-sub-text">Supported: PDF, DOCX, TXT (Processed Locally)</p>
+          <input type="file" id="fileInputEl" accept=".pdf,.doc,.docx,.txt" hidden>
+        </div>
+
+        <!-- Quick 1-Click Sample Resume Loader -->
+        <div class="quick-sample-loader">
+          <span>Don't have a resume handy?</span>
+          <button type="button" class="btn-sample-load" id="btnLoadSampleResume">
+            Load Sample Tech Resume
+          </button>
+        </div>
+
+        <!-- File Uploaded Badge -->
+        <div class="file-uploaded-info" id="fileUploadedBadge">
+          <div class="file-meta-icon">📄</div>
+          <div class="file-meta-details">
+            <div class="file-name-line" id="badgeFileName">resume.pdf</div>
+            <div class="file-size-line" id="badgeFileSize">142 KB</div>
+          </div>
+          <button class="btn-file-remove" id="btnRemoveFile" title="Remove File">✕</button>
+        </div>
+
+        <!-- Profession & Candidate Fields -->
+        <div class="input-field">
+          <label for="selectProfession">Target Profession / Track</label>
+          <select id="selectProfession">
+            <option value="software_engineer">Full Stack / Software Engineer</option>
+            <option value="data_scientist">Data Scientist & AI/ML Engineer</option>
+            <option value="devops_cloud">DevOps & Cloud Platform Engineer</option>
+            <option value="product_manager">Product Manager (Technical & Growth)</option>
+            <option value="cybersecurity">Cybersecurity & SecOps Analyst</option>
+            <option value="ui_ux_designer">UI/UX & Product Designer</option>
+            <option value="data_analyst">Data Analyst & BI Specialist</option>
+            <option value="mobile_dev">Mobile App Developer (iOS/Android)</option>
+          </select>
+        </div>
+
+        <div class="input-row">
+          <div class="input-field">
+            <label for="candName">Candidate Full Name</label>
+            <input type="text" id="candName" placeholder="Auto-extracted if left blank">
+          </div>
+          <div class="input-field">
+            <label for="candRole">Role Title</label>
+            <input type="text" id="candRole" placeholder="e.g. Senior Backend Engineer">
+          </div>
+        </div>
+
+        <div class="input-row">
+          <div class="input-field">
+            <label for="candEmail">Email Address</label>
+            <input type="email" id="candEmail" placeholder="Auto-detected from resume">
+          </div>
+          <div class="input-field">
+            <label for="candPhone">Phone Number</label>
+            <input type="tel" id="candPhone" placeholder="Auto-detected from resume">
+          </div>
+        </div>
+
+        <div class="input-field">
+          <label for="jobDescText">Job Description / Specific Role Requirements (Optional)</label>
+          <textarea id="jobDescText" placeholder="Paste the target job description or requirements here to calculate precision keyword alignment..."></textarea>
+        </div>
+
+        <button class="btn-screen-action" id="btnRunScreening" disabled>
+          <span>⚡ Analyze & Benchmark Resume</span>
+        </button>
+
+        <div class="screen-progress" id="screenProgress">
+          <div class="progress-track">
+            <div class="progress-fill" id="progressFillBar"></div>
+          </div>
+          <div class="progress-status-text" id="progressStatusText">Extracting text layers...</div>
+        </div>
+      </div>
+
+      <!-- Right Panel: Results & Intelligence Dashboard -->
+      <div class="panel-card">
+        <h3>
+          <span>2. Screening Score & Industry Intelligence</span>
+          <span style="font-size: 0.75rem; font-family: var(--font-mono); color: var(--accent-cyan); font-weight: normal;">Report Output</span>
+        </h3>
+
+        <!-- Idle State -->
+        <div class="idle-report-state" id="idleReportState">
+          <div class="idle-icon">📊</div>
+          <div style="font-weight: 600; color: var(--ink); margin-bottom: 6px;">No Resume Analyzed Yet</div>
+          <p style="font-size: 0.85rem; max-width: 38ch; margin: 0 auto;">
+            Upload a candidate resume or load our sample resume on the left to run ATS scoring, industry gap detection, and customized profession advice.
+          </p>
+        </div>
+
+        <!-- Live Results Container -->
+        <div id="results-view">
+          <!-- Score Gauge Card -->
+          <div class="score-hero-box">
+            <div class="radial-meter">
+              <svg width="160" height="160" viewBox="0 0 160 160">
+                <circle class="track" cx="80" cy="80" r="68"/>
+                <circle class="meter-fill" id="gaugeFillCircle" cx="80" cy="80" r="68" stroke-dasharray="427" stroke-dashoffset="427"/>
+              </svg>
+              <div class="radial-inner-content">
+                <div class="score-big-num" id="scoreNumVal">0</div>
+                <div class="score-sub-label">Match Score</div>
+              </div>
+            </div>
+            <div class="score-verdict-title" id="scoreVerdictTitle">Strong Match</div>
+            <div class="score-verdict-desc" id="scoreVerdictDesc">
+              Candidate profile displays strong alignment with industry benchmarks and core technical foundations.
+            </div>
+          </div>
+
+          <!-- Quick Candidate Meta -->
+          <table class="candidate-summary-table">
+            <tr><td>Candidate</td><td id="resOutName">—</td></tr>
+            <tr><td>Email</td><td id="resOutEmail">—</td></tr>
+            <tr><td>Phone</td><td id="resOutPhone">—</td></tr>
+            <tr><td>Track / Role</td><td id="resOutRole">—</td></tr>
+            <tr><td>Word Count</td><td id="resOutWords">—</td></tr>
+          </table>
+
+          <!-- Result Tabs -->
+          <div class="result-tabs">
+            <button class="res-tab-btn active" onclick="switchResultTab('skillsTab')">Skills & Gaps</button>
+            <button class="res-tab-btn" onclick="switchResultTab('structureTab')">Structure & ATS</button>
+            <button class="res-tab-btn" onclick="switchResultTab('adviceTab')">Role Recommendations</button>
+          </div>
+
+          <!-- Tab 1: Skills & Gaps -->
+          <div id="skillsTab" class="res-tab-content">
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-emerald); margin-bottom: 6px;">
+                ✓ Verified Skills Found in Resume (<span id="countFound">0</span>)
+              </div>
+              <div class="skill-tag-container" id="resFoundTags"></div>
+            </div>
+
+            <div style="margin-bottom: 16px;" id="missingJdGroup">
+              <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-rose); margin-bottom: 6px;">
+                ✕ High-Priority Role Gaps (<span id="countMissing">0</span>)
+              </div>
+              <div class="skill-tag-container" id="resMissingTags"></div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-violet); margin-bottom: 6px;">
+                ★ 2025/2026 Trending Industry Boosters for this Profession
+              </div>
+              <div class="skill-tag-container" id="resTrendingBoosters"></div>
+            </div>
+
+            <div style="margin-bottom: 16px;">
+              <div style="font-size: 0.8rem; font-weight: 600; color: var(--accent-cyan); margin-bottom: 6px;">
+                ⚡ Essential Soft Skills Detected / Recommended
+              </div>
+              <div class="skill-tag-container" id="resSoftTags"></div>
+            </div>
+          </div>
+
+          <!-- Tab 2: Structure & ATS -->
+          <div id="structureTab" class="res-tab-content" style="display:none;">
+            <div style="font-size: 0.82rem; font-weight: 600; color: var(--ink-dim); margin-bottom: 10px;">
+              Resume Section Coverage (Standard ATS Parser Checklist)
+            </div>
+            <div class="checklist-grid" id="resSectionChecklist"></div>
+          </div>
+
+          <!-- Tab 3: Profession Advice & Rewrites -->
+          <div id="adviceTab" class="res-tab-content" style="display:none;">
+            <div class="recommendations-box">
+              <div class="rec-title">Role-Specific Action Plan</div>
+              <ul class="rec-bullet-list" id="resAdviceList"></ul>
+            </div>
+          </div>
+
+          <button class="btn-print-report" onclick="window.print()">
+            <span>🖨️ Export / Print Candidate Intelligence Report</span>
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================================================
+     HOW IT WORKS PIPELINE
+     ========================================================================== */
+-->
+<section id="how-it-works" style="padding: 60px 0; border-top: 1px solid var(--panel-border-subtle);">
+  <div class="wrap">
+    <div class="section-intro">
+      <span class="section-tag">Precision Architecture</span>
+      <h2>Four-Stage Intelligent Screening Pipeline</h2>
+      <p>How Scanline decodes resumes client-side with zero data leaks.</p>
+    </div>
+
+    <div style="display:grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap:20px;">
+      <div style="background:var(--panel); border:1px solid var(--panel-border-subtle); border-radius:var(--radius-md); padding:20px;">
+        <div style="font-family:var(--font-mono); font-size:1.4rem; color:var(--accent-cyan); font-weight:700; margin-bottom:8px;">01</div>
+        <h4 style="margin:0 0 6px; font-size:1rem; font-family:var(--font-display);">In-Browser Extraction</h4>
+        <p style="margin:0; font-size:0.85rem; color:var(--ink-dim);">PDF and DOCX files are parsed directly inside client memory. No resumes are sent to external servers.</p>
+      </div>
+
+      <div style="background:var(--panel); border:1px solid var(--panel-border-subtle); border-radius:var(--radius-md); padding:20px;">
+        <div style="font-family:var(--font-mono); font-size:1.4rem; color:var(--accent); font-weight:700; margin-bottom:8px;">02</div>
+        <h4 style="margin:0 0 6px; font-size:1rem; font-family:var(--font-display);">Section & Layout Audit</h4>
+        <p style="margin:0; font-size:0.85rem; color:var(--ink-dim);">Detects crucial sections like Experience, Education, Projects, and verified contact points.</p>
+      </div>
+
+      <div style="background:var(--panel); border:1px solid var(--panel-border-subtle); border-radius:var(--radius-md); padding:20px;">
+        <div style="font-family:var(--font-mono); font-size:1.4rem; color:var(--accent-violet); font-weight:700; margin-bottom:8px;">03</div>
+        <h4 style="margin:0 0 6px; font-size:1rem; font-family:var(--font-display);">Skill Matrix Gap Radar</h4>
+        <p style="margin:0; font-size:0.85rem; color:var(--ink-dim);">Cross-references technical and soft skills against contemporary 2025/2026 industry standards.</p>
+      </div>
+
+      <div style="background:var(--panel); border:1px solid var(--panel-border-subtle); border-radius:var(--radius-md); padding:20px;">
+        <div style="font-family:var(--font-mono); font-size:1.4rem; color:var(--accent-emerald); font-weight:700; margin-bottom:8px;">04</div>
+        <h4 style="margin:0 0 6px; font-size:1rem; font-family:var(--font-display);">ATS Scoring & Rewrites</h4>
+        <p style="margin:0; font-size:0.85rem; color:var(--ink-dim);">Generates weighted match ratings with high-impact metric rewrite formulas for resume optimization.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ==========================================================================
+     FOOTER
+     ========================================================================== */
+-->
+<footer>
+  <div class="wrap footer-content">
+    <div>
+      <b>Scanline 2.0</b> — Client-side AI Resume Screening & Industry Skill Intelligence.
+    </div>
+    <div>
+      Demo Credentials: <code>recruiter@scanline.ai</code> / <code>alex.chen@scanline.ai</code>
+    </div>
+  </div>
+</footer>
+
+<!-- External PDF and Word Parsers (CDN) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/mammoth/1.6.0/mammoth.browser.min.js"></script>
+
+<script>
+/* ==========================================================================
+   GLOBAL APP STATE & INDUSTRY KNOWLEDGE BASE
+   ========================================================================== */
+if (window['pdfjsLib']) {
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.11.174/pdf.worker.min.js';
+}
+
+// 8 High-Demand Industry Professions & Their Complete 2025/2026 Skill Matrix
+const INDUSTRY_PROFESSIONS = {
+  software_engineer: {
+    id: "software_engineer",
+    title: "Full Stack / Software Engineer",
+    icon: "💻",
+    description: "Builds scalable web applications, robust microservices, and modern frontend/backend architectures.",
+    coreTech: ["JavaScript", "TypeScript", "Python", "Java", "Go", "React", "Node.js", "SQL", "PostgreSQL", "REST APIs", "Git", "Docker", "Data Structures"],
+    trendingTech: ["Next.js", "FastAPI", "GraphQL", "Kubernetes", "Redis", "Vector DBs", "Kafka", "CI/CD", "AWS", "gRPC", "Serverless", "Tailwind CSS"],
+    softSkills: ["System Design Tradeoffs", "Cross-Functional Collaboration", "Code Review Mentorship", "Agile / Scrum Sprint Delivery", "Technical Documentation", "Root Cause Analysis"],
+    advice: [
+      "Quantify your backend throughput (e.g. 'handled 15,000 requests/sec with p99 latency < 45ms').",
+      "Highlight modern cloud containerization (Docker, Kubernetes) and CI/CD automated deployments.",
+      "Showcase full-stack TypeScript safety across API contracts and frontend state management.",
+      "Eliminate vague lines like 'worked on bug fixes' in favor of 'reduced customer-reported defects by 34%'."
+    ],
+    bulletRewrite: {
+      weak: "Built REST APIs for the user dashboard and fixed database issues.",
+      strong: "Architected 12 resilient RESTful microservices in Node.js/PostgreSQL with Redis caching, boosting dashboard load times by 42% for 180K daily active users."
+    }
+  },
+
+  data_scientist: {
+    id: "data_scientist",
+    title: "Data Scientist & AI/ML Engineer",
+    icon: "🧠",
+    description: "Develops machine learning models, predictive intelligence, and production-grade Generative AI pipelines.",
+    coreTech: ["Python", "SQL", "Machine Learning", "Deep Learning", "Pandas", "NumPy", "Scikit-Learn", "PyTorch", "TensorFlow", "Statistics", "Data Cleaning"],
+    trendingTech: ["LLMs", "RAG (Retrieval Augmented Generation)", "LangChain", "LlamaIndex", "Hugging Face", "Vector DBs (Pinecone/Qdrant)", "MLflow", "vLLM", "Fine-Tuning", "Docker", "AWS SageMaker"],
+    softSkills: ["Translating Business Questions to Math", "Stakeholder Storytelling with Data", "Ethical AI & Bias Detection", "Experimentation Rigor (A/B Testing)", "Cross-Team Communication"],
+    advice: [
+      "Explicitly mention model evaluation metrics (e.g. 'boosted F1-score from 0.74 to 0.89 and reduced inference cost by 28%').",
+      "Emphasize deployment to production (FastAPI, ONNX, Triton) rather than keeping code confined to Jupyter notebooks.",
+      "Detail your RAG / embedding strategies: chunking methods, reranking, and semantic search precision.",
+      "Highlight your data validation pipeline and handling of dirty/sparse datasets."
+    ],
+    bulletRewrite: {
+      weak: "Used machine learning algorithms to predict customer churn in Python.",
+      strong: "Developed an XGBoost and PyTorch churn prediction model on 2.4M customer records, reducing annual subscriber attrition by 18% ($1.2M retained ARR)."
+    }
+  },
+
+  devops_cloud: {
+    id: "devops_cloud",
+    title: "DevOps & Cloud Platform Engineer",
+    icon: "☁️",
+    description: "Automates infrastructure, manages distributed Kubernetes clusters, and guarantees high availability.",
+    coreTech: ["Linux", "AWS", "Docker", "Kubernetes", "CI/CD", "Git", "Terraform", "Bash Scripting", "Python", "Networking", "Jenkins", "Ansible"],
+    trendingTech: ["GitOps (ArgoCD)", "Helm", "eBPF", "Prometheus & Grafana", "Datadog", "OpenTelemetry", "FinOps / Cloud Cost Optimization", "Zero-Trust Security", "GCP", "Azure", "Vault"],
+    softSkills: ["Incident Management Under Pressure (SEV-1)", "Blameless Post-Mortem Facilitation", "Security Mindset", "Cost/Performance Tradeoff Negotiation", "Developer Experience (DevEx) Empathy"],
+    advice: [
+      "Spotlight infrastructure-as-code automation percentage (e.g. '100% codified via Terraform & Helm').",
+      "Highlight uptime and reliability metrics (e.g. 'achieved 99.99% service SLA across 4 cloud regions').",
+      "Feature cloud cost reductions and automated auto-scaling optimization achievements.",
+      "List major certifications clearly (AWS Solutions Architect, CKA - Certified Kubernetes Administrator)."
+    ],
+    bulletRewrite: {
+      weak: "Responsible for managing AWS servers and deploying software using Jenkins.",
+      strong: "Automated multi-region AWS infrastructure using Terraform and ArgoCD, slashing deployment rollback rates by 70% and saving $45K/year in idle cloud spend."
+    }
+  },
+
+  product_manager: {
+    id: "product_manager",
+    title: "Product Manager (Technical & Growth)",
+    icon: "🎯",
+    description: "Drives product strategy, defines feature roadmaps, and aligns engineering with business outcomes.",
+    coreTech: ["Product Roadmapping", "PRDs & Specs", "Agile / Scrum", "Jira", "SQL Queries", "A/B Testing", "Mixpanel / Amplitude", "Figma", "User Journey Mapping"],
+    trendingTech: ["AI Product Strategy", "Product-Led Growth (PLG)", "Data Warehousing", "API Architecture Literacy", "Feature Flagging (LaunchDarkly)", "Customer Retention Modeling"],
+    softSkills: ["Executive Stakeholder Influence", "Customer Interview Synthesis", "Prioritization Frameworks (RICE)", "Conflict Resolution", "Strategic Vision Communication", "Decisiveness with Ambiguity"],
+    advice: [
+      "Tie every single product initiative to hard business metrics (e.g. ARR growth, activation conversion, MAU expansion).",
+      "Show how you conduct discovery interviews and distill customer pain points into executable engineering sprints.",
+      "Demonstrate technical literacy: explain how you negotiate technical debt tradeoffs with engineering leads.",
+      "Mention your prioritization framework (RICE, MoSCoW) and how you say 'no' effectively."
+    ],
+    bulletRewrite: {
+      weak: "Worked with developers to launch a new mobile onboarding flow.",
+      strong: "Spearheaded user research and redesign of the 4-step mobile onboarding experience, boosting day-30 user retention by 22% and generating 14,000 new active accounts."
+    }
+  },
+
+  cybersecurity: {
+    id: "cybersecurity",
+    title: "Cybersecurity & SecOps Analyst",
+    icon: "🛡️",
+    description: "Safeguards enterprise assets, executes threat hunting, and enforces zero-trust compliance standards.",
+    coreTech: ["Network Security", "SIEM (Splunk/Sentinel)", "Linux", "Vulnerability Assessment", "Firewalls", "Python / Bash", "Wireshark", "Penetration Testing", "NIST CSF"],
+    trendingTech: ["Cloud Security (CSPM)", "Zero Trust Architecture", "SOAR Automation", "MITRE ATT&CK Framework", "IAM / Okta", "Threat Intelligence", "Kubernetes Security", "DevSecOps"],
+    softSkills: ["High-Stakes Crisis Communication", "Compliance vs Usability Balance", "Investigative Curiosity", "Cross-Department Security Awareness Training", "Meticulous Audit Documentation"],
+    advice: [
+      "Quantify your incident response speed (e.g. 'reduced Mean Time to Detect (MTTD) from 4 hours to 18 minutes').",
+      "Mention standard compliance audits successfully completed (SOC2 Type II, ISO 27001, HIPAA, GDPR).",
+      "Detail your automated vulnerability remediation workflows and CI/CD security gating (SAST/DAST).",
+      "Prominently display certifications: CISSP, CompTIA Security+, CEH, or AWS Certified Security."
+    ],
+    bulletRewrite: {
+      weak: "Monitored security alerts and did vulnerability testing on company servers.",
+      strong: "Configured Splunk SIEM detection rules across 850 endpoints, remediating 140+ critical CVEs and shrinking incident response turnaround by 65%."
+    }
+  },
+
+  ui_ux_designer: {
+    id: "ui_ux_designer",
+    title: "UI/UX & Product Designer",
+    icon: "🎨",
+    description: "Creates intuitive user interfaces, cohesive design systems, and delightful digital user experiences.",
+    coreTech: ["Figma", "UI Design", "UX Research", "Wireframing", "Prototyping", "Design Systems", "Usability Testing", "Information Architecture", "Mobile App Design"],
+    trendingTech: ["Design Tokens", "Figma Auto-Layout & Variables", "Micro-Interactions", "Accessibility (WCAG AAA)", "Motion Design", "Design-to-Code Hand-off", "AI-Assisted Prototyping"],
+    softSkills: ["Deep User Empathy", "Design Critique Receptivity", "Engineering Feasibility Negotiation", "Executive Design Presentation", "Storyboarding"],
+    advice: [
+      "Always provide a live portfolio link (Behance, Dribbble, personal website) in the header contact section.",
+      "Frame case studies around the problem statement, user testing feedback, and business results.",
+      "Demonstrate mastery of scalable Figma component libraries and accessible contrast standards.",
+      "Show how you partner with frontend engineers to ensure design fidelity in production."
+    ],
+    bulletRewrite: {
+      weak: "Designed web pages and mobile screens using Figma for an e-commerce brand.",
+      strong: "Built an atomic Figma design system with 200+ accessible components, decreasing engineering hand-off cycle time by 40% and raising cart checkout completion by 19%."
+    }
+  },
+
+  data_analyst: {
+    id: "data_analyst",
+    title: "Data Analyst & BI Specialist",
+    icon: "📈",
+    description: "Transforms complex business data into actionable executive insights and real-time interactive dashboards.",
+    coreTech: ["SQL", "Excel (Advanced/VBA)", "Tableau", "Power BI", "Data Modeling", "Python", "Data Cleaning", "Data Visualization", "ETL Pipelines"],
+    trendingTech: ["Snowflake", "BigQuery", "dbt (Data Build Tool)", "PostgreSQL", "Statistical Analysis", "Cohort Analysis", "Automated Reporting", "Looker"],
+    softSkills: ["Translating Ambiguous Requests to Dashboards", "Executive Presentation Skills", "Data Integrity Skepticism", "Business Acumen & ROI Modeling", "Cross-Department Training"],
+    advice: [
+      "Highlight complex SQL techniques used regularly: window functions, recursive CTEs, and query indexing optimizations.",
+      "Mention the executive audience your dashboards serve (e.g. 'used weekly by C-suite to allocate $12M marketing budget').",
+      "Demonstrate data pipeline automation that eliminated manual spreadsheet work.",
+      "Quantify time saved or revenue identified through business intelligence models."
+    ],
+    bulletRewrite: {
+      weak: "Created weekly Excel reports and Tableau charts for the sales team.",
+      strong: "Automated a dbt & Tableau revenue tracking pipeline on Snowflake, eliminating 15 hours of manual weekly reporting and uncovering $320K in untapped recurring pipeline."
+    }
+  },
+
+  mobile_dev: {
+    id: "mobile_dev",
+    title: "Mobile App Developer (iOS/Android)",
+    icon: "📱",
+    description: "Crafts high-performance native and cross-platform mobile apps for millions of smartphone users.",
+    coreTech: ["Swift", "Kotlin", "Flutter", "React Native", "iOS SDK", "Android SDK", "Mobile UI", "REST APIs", "Git", "SQLite / Room / CoreData"],
+    trendingTech: ["SwiftUI", "Jetpack Compose", "GraphQL", "Offline-First Caching", "Firebase", "App Store Optimization (ASO)", "CI/CD (Fastlane)", "Push Notifications", "In-App Purchases"],
+    softSkills: ["Device Fragmentation Empathy", "Battery & Memory Optimization Awareness", "App Store Review Guideline Navigation", "Fast Iteration with Product Teams"],
+    advice: [
+      "Provide direct App Store or Google Play links to published apps you have contributed to.",
+      "Quote active user counts and store review ratings (e.g. 'maintained 4.8-star rating across 65K reviews').",
+      "Emphasize battery drain reduction, 60fps smooth scrolling, and crash-free session rates (e.g. 99.8% crash-free).",
+      "Mention offline-first architectures with local syncing."
+    ],
+    bulletRewrite: {
+      weak: "Developed an Android and iOS application using Flutter and fixed crashes.",
+      strong: "Engineered an offline-first Flutter application deployed to 120K users, optimizing image caching to cut memory consumption by 35% and securing a 4.9-star App Store rating."
+    }
+  }
+};
+
+// Expanded Master Skill Vocabulary (160+ skills across software, cloud, data, security, and modern tech)
+const MASTER_SKILLS = [
+  "javascript","typescript","python","java","c++","c#","c","go","golang","rust","ruby","php","swift","kotlin",
+  "html","css","react","angular","vue","vue.js","svelte","next.js","nuxt","node.js","node","express","fastapi",
+  "django","flask","spring","spring boot","asp.net","graphql","rest api","restful apis","grpc","sql","mysql",
+  "postgresql","postgres","sqlite","mongodb","redis","elasticsearch","cassandra","dynamodb","snowflake","bigquery",
+  "aws","azure","gcp","google cloud","docker","kubernetes","k8s","terraform","ansible","helm","linux","bash",
+  "git","github","gitlab","ci/cd","jenkins","github actions","argocd","datadog","prometheus","grafana",
+  "machine learning","deep learning","data science","artificial intelligence","ai","llm","llms","rag",
+  "langchain","llamaindex","hugging face","vector dbs","pinecone","qdrant","weaviate","pytorch","tensorflow","keras",
+  "nlp","computer vision","pandas","numpy","scipy","scikit-learn","opencv","tableau","power bi","looker","dbt",
+  "figma","ui/ux","wireframing","prototyping","user research","design system","design systems","flutter","react native",
+  "android","ios","swiftui","jetpack compose","cybersecurity","siem","splunk","wireshark","penetration testing",
+  "cryptography","soc2","iso 27001","zero trust","iam","agile","scrum","kanban","jira","product management",
+  "a/b testing","system design","microservices","event-driven","kafka","rabbitmq","clean architecture","unit testing",
+  "test driven development","tdd","selenium","cypress","playwright","jest","vitest","junit","devops","devsecops",
+  "communication","leadership","mentorship","problem solving","stakeholder management","root cause analysis",
+  "cross-functional","collaboration","technical documentation","data analysis","data structures","algorithms"
+];
+
+// Structural Resume Check Patterns
+const RESUME_STRUCTURE_CHECKS = [
+  { key: "Contact Details", test: t => /[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/.test(t) },
+  { key: "Professional Summary", test: t => /(summary|profile|about me|objective|background)\b/i.test(t) },
+  { key: "Education Section", test: t => /(education|bachelor|b\.?tech|m\.?tech|master|degree|university|college|gpa)\b/i.test(t) },
+  { key: "Work Experience", test: t => /(experience|employment|work history|career|internship)\b/i.test(t) },
+  { key: "Skills Section", test: t => /(skills|technologies|proficiencies|tools|technical stack)\b/i.test(t) },
+  { key: "Projects & Impact", test: t => /(projects|portfolio|case studies|applications)\b/i.test(t) },
+  { key: "Certifications / Awards", test: t => /(certificat|license|accreditation|honors|awards)\b/i.test(t) }
+];
+
+// Pre-seeded Demo User Accounts
+const DEMO_ACCOUNTS = {
+  "recruiter@scanline.ai": {
+    name: "Sarah Jenkins",
+    email: "recruiter@scanline.ai",
+    password: "recruiter123",
+    role: "Recruiter Pro",
+    initials: "SJ"
+  },
+  "alex.chen@scanline.ai": {
+    name: "Alex Chen",
+    email: "alex.chen@scanline.ai",
+    password: "candidate123",
+    role: "Candidate",
+    initials: "AC"
+  }
+};
+
+/* ==========================================================================
+   AUTHENTICATION & SESSION MANAGEMENT
+   ========================================================================== */
+let currentUser = null;
+
+function initAuth() {
+  const saved = localStorage.getItem("scanline_user");
+  if (saved) {
+    try {
+      currentUser = JSON.parse(saved);
+    } catch(e) { currentUser = null; }
+  }
+  updateAuthUI();
+}
+
+function updateAuthUI() {
+  const authOpenBtn = document.getElementById('authOpenBtn');
+  const userProfileMenu = document.getElementById('userProfileMenu');
+
+  if (currentUser) {
+    authOpenBtn.style.display = 'none';
+    userProfileMenu.classList.add('active');
+    document.getElementById('userAvatarText').textContent = currentUser.initials || currentUser.name.slice(0,2).toUpperCase();
+    document.getElementById('userNameHeader').textContent = currentUser.name.split(" ")[0];
+    document.getElementById('userRoleHeader').textContent = currentUser.role || 'Member';
+    document.getElementById('dropdownFullName').textContent = currentUser.name;
+    document.getElementById('dropdownEmail').textContent = currentUser.email;
+  } else {
+    authOpenBtn.style.display = 'flex';
+    userProfileMenu.classList.remove('active');
+  }
+}
+
+function switchUserPersona(personaKey) {
+  if (personaKey === 'recruiter') {
+    loginUser(DEMO_ACCOUNTS["recruiter@scanline.ai"]);
+  } else {
+    loginUser(DEMO_ACCOUNTS["alex.chen@scanline.ai"]);
+  }
+  document.getElementById('profileDropdown').classList.remove('open');
+}
+
+function loginUser(userData) {
+  currentUser = userData;
+  localStorage.setItem("scanline_user", JSON.stringify(userData));
+  updateAuthUI();
+  closeAuthModal();
+}
+
+function logoutUser() {
+  currentUser = null;
+  localStorage.removeItem("scanline_user");
+  updateAuthUI();
+  document.getElementById('profileDropdown').classList.remove('open');
+}
+
+// Modal controls
+const authModal = document.getElementById('authModal');
+const authOpenBtn = document.getElementById('authOpenBtn');
+const authModalClose = document.getElementById('authModalClose');
+const userDropdownTrigger = document.getElementById('userDropdownTrigger');
+const profileDropdown = document.getElementById('profileDropdown');
+
+authOpenBtn.addEventListener('click', () => {
+  authModal.classList.add('active');
+});
+authModalClose.addEventListener('click', closeAuthModal);
+authModal.addEventListener('click', (e) => {
+  if (e.target === authModal) closeAuthModal();
+});
+function closeAuthModal() {
+  authModal.classList.remove('active');
+  document.getElementById('authMsg').className = 'auth-status-msg';
+}
+
+userDropdownTrigger.addEventListener('click', (e) => {
+  e.stopPropagation();
+  profileDropdown.classList.toggle('open');
+});
+document.addEventListener('click', () => {
+  profileDropdown.classList.remove('open');
+});
+
+document.getElementById('btnLogout').addEventListener('click', logoutUser);
+
+// Quick Demo Fills
+document.getElementById('btnFillRecruiter').addEventListener('click', () => {
+  document.getElementById('inputEmail').value = "recruiter@scanline.ai";
+  document.getElementById('inputPassword').value = "recruiter123";
+  setAuthMode('signin');
+});
+document.getElementById('btnFillCandidate').addEventListener('click', () => {
+  document.getElementById('inputEmail').value = "alex.chen@scanline.ai";
+  document.getElementById('inputPassword').value = "candidate123";
+  setAuthMode('signin');
+});
+
+// Guest Bypass
+document.getElementById('btnGuestContinue').addEventListener('click', () => {
+  closeAuthModal();
+});
+
+// Tab Switcher inside Auth Modal
+let isSignUpMode = false;
+const tabSignIn = document.getElementById('tabSignIn');
+const tabSignUp = document.getElementById('tabSignUp');
+const groupName = document.getElementById('groupName');
+const btnSubmitAuth = document.getElementById('btnSubmitAuth');
+const authModalTitle = document.getElementById('authModalTitle');
+
+function setAuthMode(mode) {
+  isSignUpMode = (mode === 'signup');
+  if (isSignUpMode) {
+    tabSignUp.classList.add('active');
+    tabSignIn.classList.remove('active');
+    groupName.style.display = 'block';
+    btnSubmitAuth.textContent = "Create Free Account";
+    authModalTitle.textContent = "Join Scanline AI";
+  } else {
+    tabSignIn.classList.add('active');
+    tabSignUp.classList.remove('active');
+    groupName.style.display = 'none';
+    btnSubmitAuth.textContent = "Sign In to Dashboard";
+    authModalTitle.textContent = "Welcome Back";
+  }
+}
+tabSignIn.addEventListener('click', () => setAuthMode('signin'));
+tabSignUp.addEventListener('click', () => setAuthMode('signup'));
+
+// Password Visibility Toggle
+const btnTogglePwd = document.getElementById('btnTogglePwd');
+const inputPassword = document.getElementById('inputPassword');
+btnTogglePwd.addEventListener('click', () => {
+  const isPwd = inputPassword.type === 'password';
+  inputPassword.type = isPwd ? 'text' : 'password';
+  btnTogglePwd.textContent = isPwd ? '🙈' : '👁️';
+});
+
+// Handle Auth Submission
+document.getElementById('authForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const email = document.getElementById('inputEmail').value.trim();
+  const pwd = document.getElementById('inputPassword').value;
+  const name = document.getElementById('inputName').value.trim();
+  const msgEl = document.getElementById('authMsg');
+
+  if (isSignUpMode) {
+    if (!name) {
+      showAuthError("Please provide your full name.");
+      return;
+    }
+    const newUser = {
+      name: name,
+      email: email,
+      password: pwd,
+      role: "Candidate",
+      initials: name.slice(0,2).toUpperCase()
+    };
+    loginUser(newUser);
+  } else {
+    // Check demo accounts first
+    if (DEMO_ACCOUNTS[email] && DEMO_ACCOUNTS[email].password === pwd) {
+      loginUser(DEMO_ACCOUNTS[email]);
+    } else if (email && pwd.length >= 4) {
+      const user = {
+        name: email.split('@')[0],
+        email: email,
+        password: pwd,
+        role: "Member",
+        initials: email.slice(0,2).toUpperCase()
+      };
+      loginUser(user);
+    } else {
+      showAuthError("Invalid credentials. Try our 1-click Demo buttons above!");
+    }
+  }
+
+  function showAuthError(text) {
+    msgEl.textContent = text;
+    msgEl.className = 'auth-status-msg error';
+  }
+});
+
+/* ==========================================================================
+   THEME SWITCHER
+   ========================================================================== */
+const themeToggleBtn = document.getElementById('themeToggleBtn');
+const themeIcon = document.getElementById('themeIcon');
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('scanline_theme', theme);
+  themeIcon.textContent = (theme === 'light') ? '🌙' : '☀️';
+}
+
+const savedTheme = localStorage.getItem('scanline_theme') || 'dark';
+applyTheme(savedTheme);
+
+themeToggleBtn.addEventListener('click', () => {
+  const current = document.documentElement.getAttribute('data-theme');
+  applyTheme(current === 'light' ? 'dark' : 'light');
+});
+
+/* ==========================================================================
+   INDUSTRY BENCHMARKS & PROFESSION TAB INTERACTION
+   ========================================================================== */
+const profTabContainer = document.getElementById('profTabContainer');
+const profIntelDisplay = document.getElementById('profIntelDisplay');
+let selectedProfId = "software_engineer";
+
+function renderProfessionTabs() {
+  profTabContainer.innerHTML = "";
+  Object.values(INDUSTRY_PROFESSIONS).forEach(prof => {
+    const btn = document.createElement('button');
+    btn.className = `btn-prof-tab ${prof.id === selectedProfId ? 'active' : ''}`;
+    btn.innerHTML = `<span>${prof.icon}</span> <span>${prof.title}</span>`;
+    btn.addEventListener('click', () => {
+      selectedProfId = prof.id;
+      document.querySelectorAll('.btn-prof-tab').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderProfessionDetails(prof);
+      document.getElementById('selectProfession').value = prof.id;
+    });
+    profTabContainer.appendChild(btn);
+  });
+
+  renderProfessionDetails(INDUSTRY_PROFESSIONS[selectedProfId]);
+}
+
+function renderProfessionDetails(prof) {
+  profIntelDisplay.innerHTML = `
+    <!-- Card 1: Core & Trending Technical Skills -->
+    <div class="intel-card">
+      <div class="intel-card-header">
+        <h3><span>${prof.icon}</span> 2025/2026 In-Demand Technical Skills</h3>
+        <span class="intel-badge">Verified Matrix</span>
+      </div>
+
+      <div style="font-size:0.8rem; font-weight:600; color:var(--accent-cyan); margin-bottom:8px;">
+        Core Foundations (Non-Negotiable)
+      </div>
+      <div class="skills-pill-group">
+        ${prof.coreTech.map(t => `<span class="skill-pill core"><span class="dot"></span>${t}</span>`).join('')}
+      </div>
+
+      <div style="font-size:0.8rem; font-weight:600; color:var(--accent-violet); margin-bottom:8px;">
+        Trending & High-Growth Accelerators
+      </div>
+      <div class="skills-pill-group">
+        ${prof.trendingTech.map(t => `<span class="skill-pill trending"><span class="dot"></span>${t}</span>`).join('')}
+      </div>
+
+      <div style="font-size:0.8rem; font-weight:600; color:var(--accent-emerald); margin-bottom:8px;">
+        Essential Soft Skills Demanded by Employers
+      </div>
+      <div class="skills-pill-group">
+        ${prof.softSkills.map(s => `<span class="skill-pill soft"><span class="dot"></span>${s}</span>`).join('')}
+      </div>
+    </div>
+
+    <!-- Card 2: Strategic Resume Advice & High Impact Rewriter -->
+    <div class="intel-card">
+      <div class="intel-card-header">
+        <h3><span>💡</span> Strategic Resume Advice for ${prof.title}</h3>
+        <span class="intel-badge" style="background:var(--purple-bg); color:var(--accent-violet);">ATS Formula</span>
+      </div>
+
+      <ul class="advice-list">
+        ${prof.advice.map(a => `
+          <li class="advice-item">
+            <span class="icon">→</span>
+            <div>${a}</div>
+          </li>
+        `).join('')}
+      </ul>
+
+      <div class="rewrite-comparison">
+        <div style="font-weight:700; font-size:0.85rem; margin-bottom:8px; color:var(--ink);">
+          ⚡ Action-Verb + Metric ATS Rewrite Example:
+        </div>
+        <div class="label-weak">Before (Weak & Passive)</div>
+        <div class="rewrite-text" style="color:var(--ink-dim); text-decoration:line-through;">
+          "${prof.bulletRewrite.weak}"
+        </div>
+        <div class="label-strong">After (High-Impact ATS Optimized)</div>
+        <div class="rewrite-text" style="font-weight:500;">
+          "${prof.bulletRewrite.strong}"
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+renderProfessionTabs();
+
+// Synchronize dropdown when changed
+document.getElementById('selectProfession').addEventListener('change', (e) => {
+  const chosen = e.target.value;
+  selectedProfId = chosen;
+  document.querySelectorAll('.btn-prof-tab').forEach(b => {
+    b.classList.toggle('active', b.textContent.includes(INDUSTRY_PROFESSIONS[chosen].title));
+  });
+  renderProfessionDetails(INDUSTRY_PROFESSIONS[chosen]);
+});
+
+/* ==========================================================================
+   RESUME FILE HANDLING & SAMPLE LOADER
+   ========================================================================== */
+let activeUploadedFile = null;
+let parsedResumeText = "";
+
+const dropzoneBox = document.getElementById('dropzoneBox');
+const fileInputEl = document.getElementById('fileInputEl');
+const fileUploadedBadge = document.getElementById('fileUploadedBadge');
+const badgeFileName = document.getElementById('badgeFileName');
+const badgeFileSize = document.getElementById('badgeFileSize');
+const btnRemoveFile = document.getElementById('btnRemoveFile');
+const btnRunScreening = document.getElementById('btnRunScreening');
+const btnLoadSampleResume = document.getElementById('btnLoadSampleResume');
+
+dropzoneBox.addEventListener('click', () => fileInputEl.click());
+
+['dragover','dragenter'].forEach(evt => {
+  dropzoneBox.addEventListener(evt, (e) => {
+    e.preventDefault();
+    dropzoneBox.classList.add('drag-active');
+  });
+});
+['dragleave','drop'].forEach(evt => {
+  dropzoneBox.addEventListener(evt, (e) => {
+    e.preventDefault();
+    dropzoneBox.classList.remove('drag-active');
+  });
+});
+
+dropzoneBox.addEventListener('drop', (e) => {
+  if (e.dataTransfer.files.length) handleIncomingFile(e.dataTransfer.files[0]);
+});
+fileInputEl.addEventListener('change', (e) => {
+  if (e.target.files.length) handleIncomingFile(e.target.files[0]);
+});
+
+function handleIncomingFile(file) {
+  const okTypes = /\.(pdf|docx?|txt)$/i.test(file.name);
+  if (!okTypes) {
+    alert("Please upload a .pdf, .docx, or .txt file.");
+    return;
+  }
+  activeUploadedFile = file;
+  badgeFileName.textContent = file.name;
+  badgeFileSize.textContent = (file.size / 1024).toFixed(1) + " KB";
+  fileUploadedBadge.classList.add('active');
+  btnRunScreening.disabled = false;
+}
+
+btnRemoveFile.addEventListener('click', (e) => {
+  e.stopPropagation();
+  clearUploadedFile();
+});
+
+function clearUploadedFile() {
+  activeUploadedFile = null;
+  parsedResumeText = "";
+  fileInputEl.value = "";
+  fileUploadedBadge.classList.remove('active');
+  btnRunScreening.disabled = true;
+  document.getElementById('results-view').classList.remove('active');
+  document.getElementById('idleReportState').style.display = 'block';
+}
+
+// 1-Click Sample Resume Loader
+const SAMPLE_TECH_RESUME = `
+ALEX CHEN
+San Francisco, CA | alex.chen@scanline.ai | (415) 890-2341 | github.com/alexchen-dev | linkedin.com/in/alexchen
+
+PROFESSIONAL SUMMARY
+Senior Full Stack Engineer with 5+ years of experience building resilient microservices, high-traffic distributed web applications, and production AI integrations. Expert in TypeScript, Python, React, and PostgreSQL. Demonstrated record of optimizing cloud architectures, scaling REST APIs to 20K RPS, and driving cross-functional Agile teams.
+
+TECHNICAL SKILLS
+- Languages: JavaScript, TypeScript, Python, SQL, Go, HTML, CSS
+- Frontend: React, Next.js, Redux, Tailwind CSS, Vite
+- Backend: Node.js, Express, FastAPI, REST APIs, GraphQL, Microservices
+- Data & Cloud: PostgreSQL, Redis, MongoDB, Docker, Kubernetes, AWS, Git, CI/CD, Kafka
+- AI & Next-Gen: LangChain, RAG, Vector DBs (Qdrant), PyTorch fundamentals
+- Methodologies: Agile / Scrum, Unit Testing, System Design, Root Cause Analysis
+
+WORK EXPERIENCE
+Senior Full Stack Engineer | CloudScale Systems | 2022 - Present
+- Architected and deployed 14 Node.js and FastAPI microservices in Kubernetes on AWS, cutting p99 latency from 180ms to 42ms for 220,000 daily active users.
+- Led the migration of legacy monolith to React and Next.js, raising Core Web Vitals score from 58 to 96 and improving checkout conversion by 18%.
+- Integrated an internal AI RAG documentation assistant using LangChain and Qdrant, saving support engineers 12 hours/week.
+- Mentored 4 junior engineers on code reviews, system design tradeoffs, and automated unit testing with Jest and Playwright.
+
+Software Engineer | NextGen Digital | 2020 - 2022
+- Developed scalable customer dashboard components in React, TypeScript, and Tailwind CSS.
+- Automated CI/CD pipelines via GitHub Actions and Docker, reducing deployment cycle times by 65%.
+- Implemented PostgreSQL query indexing and Redis caching, eliminating database bottlenecks during high-traffic flash sales.
+
+EDUCATION
+B.Tech in Computer Science & Engineering | University of Technology, 2020
+- Dean's List, GPA: 3.85 / 4.0
+- Coursework: Data Structures, Algorithms, Operating Systems, Database Management Systems, Distributed Computing
+
+CERTIFICATIONS & AWARDS
+- AWS Certified Solutions Architect - Associate
+- Hackathon 1st Place Winner for Generative AI Productivity Tool
+`;
+
+btnLoadSampleResume.addEventListener('click', () => {
+  const blob = new Blob([SAMPLE_TECH_RESUME], { type: 'text/plain' });
+  const file = new File([blob], "Alex_Chen_Senior_Engineer_Resume.txt", { type: 'text/plain' });
+  handleIncomingFile(file);
+  document.getElementById('candName').value = "Alex Chen";
+  document.getElementById('candRole').value = "Senior Full Stack / AI Engineer";
+  document.getElementById('candEmail').value = "alex.chen@scanline.ai";
+  document.getElementById('candPhone').value = "(415) 890-2341";
+  document.getElementById('selectProfession').value = "software_engineer";
+  document.getElementById('jobDescText').value = "Seeking a Senior Full Stack Engineer proficient in TypeScript, React, Node.js, Python, PostgreSQL, AWS, Docker, Kubernetes, and AI/LLM integrations. Must have strong system design tradeoffs and agile communication.";
+});
+
+/* ==========================================================================
+   TEXT EXTRACTION (PDF.JS, MAMMOTH, PLAIN TEXT)
+   ========================================================================== */
+async function extractFileText(file) {
+  const ext = file.name.split('.').pop().toLowerCase();
+
+  if (ext === 'txt') {
+    return await file.text();
+  }
+
+  if (ext === 'pdf') {
+    try {
+      const buffer = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({ data: buffer }).promise;
+      let fullText = "";
+      for (let i = 1; i <= pdf.numPages; i++) {
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        fullText += content.items.map(it => it.str).join(" ") + "\n";
+      }
+      return fullText;
+    } catch(err) {
+      console.warn("PDF parsing error:", err);
+      return "";
+    }
+  }
+
+  if (ext === 'docx') {
+    try {
+      const buffer = await file.arrayBuffer();
+      const result = await mammoth.extractRawText({ arrayBuffer: buffer });
+      return result.value || "";
+    } catch(err) {
+      console.warn("DOCX parsing error:", err);
+      return "";
+    }
+  }
+
+  return "";
+}
+
+/* ==========================================================================
+   SCREENING ANALYSIS & SCORING PIPELINE
+   ========================================================================== */
+btnRunScreening.addEventListener('click', async () => {
+  if (!activeUploadedFile) return;
+
+  btnRunScreening.disabled = true;
+  const progressBox = document.getElementById('screenProgress');
+  const fillBar = document.getElementById('progressFillBar');
+  const statusText = document.getElementById('progressStatusText');
+
+  progressBox.classList.add('active');
+  document.getElementById('results-view').classList.remove('active');
+
+  const updateTick = (pct, label) => new Promise(res => {
+    fillBar.style.width = pct + "%";
+    statusText.textContent = label;
+    setTimeout(res, 340);
+  });
+
+  await updateTick(20, "Reading raw file data in browser memory...");
+  parsedResumeText = await extractFileText(activeUploadedFile);
+
+  await updateTick(45, "Auditing resume structure & ATS readability...");
+  await updateTick(75, "Benchmarking skills vs. 2025/2026 industry matrix...");
+  await updateTick(100, "Generating customized profession intelligence...");
+
+  progressBox.classList.remove('active');
+  document.getElementById('idleReportState').style.display = 'none';
+  executeAnalysisDashboard(parsedResumeText);
+  btnRunScreening.disabled = false;
+});
+
+function executeAnalysisDashboard(rawText) {
+  const clean = rawText || "";
+  const words = clean.trim().split(/\s+/).filter(Boolean);
+  const isUnreadable = clean.trim().length < 15;
+
+  // Selected Profession
+  const profKey = document.getElementById('selectProfession').value;
+  const targetProf = INDUSTRY_PROFESSIONS[profKey] || INDUSTRY_PROFESSIONS.software_engineer;
+
+  // Contact parsing
+  const emailFound = clean.match(/[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}/);
+  const phoneFound = clean.match(/(\+?\d{1,3}[-.\s]?)?\(?\d{3,4}\)?[-.\s]?\d{3}[-.\s]?\d{3,4}/);
+
+  const inputName = document.getElementById('candName').value.trim();
+  const inputRole = document.getElementById('candRole').value.trim();
+  const inputEmail = document.getElementById('candEmail').value.trim();
+  const inputPhone = document.getElementById('candPhone').value.trim();
+
+  document.getElementById('resOutName').textContent = inputName || (activeUploadedFile.name.replace(/\.[^.]+$/, ""));
+  document.getElementById('resOutEmail').textContent = inputEmail || (emailFound ? emailFound[0] : "Not detected");
+  document.getElementById('resOutPhone').textContent = inputPhone || (phoneFound ? phoneFound[0] : "Not detected");
+  document.getElementById('resOutRole').textContent = inputRole || targetProf.title;
+  document.getElementById('resOutWords').textContent = isUnreadable ? "N/A" : words.length + " words";
+
+  // 1. Structure Audit Checklist
+  const checklistContainer = document.getElementById('resSectionChecklist');
+  checklistContainer.innerHTML = "";
+  let sectionsFoundCount = 0;
+
+  RESUME_STRUCTURE_CHECKS.forEach(chk => {
+    const passed = !isUnreadable && chk.test(clean);
+    if (passed) sectionsFoundCount++;
+
+    const item = document.createElement('div');
+    item.className = `check-item ${passed ? 'pass' : 'fail'}`;
+    item.innerHTML = `
+      <span class="${passed ? 'check-icon-pass' : 'check-icon-fail'}">${passed ? '✓' : '✕'}</span>
+      <span>${chk.key}</span>
+    `;
+    checklistContainer.appendChild(item);
+  });
+
+  // 2. Skill Detection
+  const lowerResume = clean.toLowerCase();
+  const matchedResumeSkills = isUnreadable ? [] : MASTER_SKILLS.filter(s => lowerResume.includes(s.trim()));
+
+  // Compare against target profession core and trending
+  const coreMatched = targetProf.coreTech.filter(t => lowerResume.includes(t.toLowerCase()));
+  const coreMissing = targetProf.coreTech.filter(t => !lowerResume.includes(t.toLowerCase()));
+  const trendingGaps = targetProf.trendingTech.filter(t => !lowerResume.includes(t.toLowerCase()));
+  const softMatched = targetProf.softSkills.filter(s => lowerResume.includes(s.toLowerCase()));
+
+  // Render Found Skills
+  const foundTagsContainer = document.getElementById('resFoundTags');
+  foundTagsContainer.innerHTML = "";
+  document.getElementById('countFound').textContent = matchedResumeSkills.length;
+
+  if (matchedResumeSkills.length === 0) {
+    foundTagsContainer.innerHTML = `<span style="font-size:0.8rem; color:var(--ink-faint);">No verified industry skills detected.</span>`;
+  } else {
+    matchedResumeSkills.forEach(skill => {
+      const tag = document.createElement('span');
+      tag.className = 'res-tag found';
+      tag.textContent = skill;
+      foundTagsContainer.appendChild(tag);
+    });
+  }
+
+  // Render Missing Core Gaps
+  const missingTagsContainer = document.getElementById('resMissingTags');
+  missingTagsContainer.innerHTML = "";
+  document.getElementById('countMissing').textContent = coreMissing.length;
+
+  if (coreMissing.length === 0) {
+    missingTagsContainer.innerHTML = `<span style="font-size:0.8rem; color:var(--accent-emerald);">All core technical foundations for this role are present!</span>`;
+  } else {
+    coreMissing.forEach(skill => {
+      const tag = document.createElement('span');
+      tag.className = 'res-tag missing';
+      tag.textContent = skill;
+      missingTagsContainer.appendChild(tag);
+    });
+  }
+
+  // Render Trending Boosters
+  const trendingContainer = document.getElementById('resTrendingBoosters');
+  trendingContainer.innerHTML = "";
+  trendingGaps.slice(0, 8).forEach(boost => {
+    const tag = document.createElement('span');
+    tag.className = 'res-tag trending-gap';
+    tag.textContent = "+ " + boost;
+    trendingContainer.appendChild(tag);
+  });
+
+  // Render Soft Skills
+  const softContainer = document.getElementById('resSoftTags');
+  softContainer.innerHTML = "";
+  targetProf.softSkills.forEach(soft => {
+    const hasSoft = lowerResume.includes(soft.toLowerCase());
+    const tag = document.createElement('span');
+    tag.className = hasSoft ? 'res-tag soft-detected' : 'res-tag';
+    tag.style.background = hasSoft ? 'var(--info-bg)' : 'var(--bg-secondary)';
+    tag.style.color = hasSoft ? 'var(--accent-cyan)' : 'var(--ink-dim)';
+    tag.textContent = (hasSoft ? '✓ ' : '• ') + soft;
+    softContainer.appendChild(tag);
+  });
+
+  // 3. Overall Weighted Score Calculation
+  const structureWeight = (sectionsFoundCount / RESUME_STRUCTURE_CHECKS.length) * 30;
+  const contactWeight = ((emailFound || inputEmail ? 5 : 0) + (phoneFound || inputPhone ? 5 : 0));
+  const coreCoverage = targetProf.coreTech.length ? (coreMatched.length / targetProf.coreTech.length) * 35 : 20;
+  const volumeBonus = (!isUnreadable && words.length >= 180 && words.length <= 1000) ? 15 : (isUnreadable ? 0 : 8);
+  const softBonus = (softMatched.length > 0) ? 10 : 5;
+
+  let totalScore = Math.round(structureWeight + contactWeight + coreCoverage + volumeBonus + softBonus);
+  totalScore = Math.max(10, Math.min(99, totalScore));
+  if (isUnreadable) totalScore = 24;
+
+  animateRadialScore(totalScore);
+
+  // Verdict text
+  const verdictTitle = document.getElementById('scoreVerdictTitle');
+  const verdictDesc = document.getElementById('scoreVerdictDesc');
+
+  if (isUnreadable) {
+    verdictTitle.textContent = "Unreadable / Sparse File";
+    verdictTitle.style.color = "var(--accent-rose)";
+    verdictDesc.textContent = "The file text could not be extracted in-browser. Please ensure the document is not an image-only scan.";
+  } else if (totalScore >= 80) {
+    verdictTitle.textContent = "Strong Industry Match";
+    verdictTitle.style.color = "var(--accent-emerald)";
+    verdictDesc.textContent = `Excellent alignment with ${targetProf.title} benchmarks. Highlights strong technical keywords and clean structure.`;
+  } else if (totalScore >= 55) {
+    verdictTitle.textContent = "Moderate Alignment (Skill Gaps)";
+    verdictTitle.style.color = "var(--accent-amber)";
+    verdictDesc.textContent = `Demonstrates solid foundation, but missing ${coreMissing.length} critical skills expected by employers in 2025/2026.`;
+  } else {
+    verdictTitle.textContent = "Significant Gaps Detected";
+    verdictTitle.style.color = "var(--accent-rose)";
+    verdictDesc.textContent = "Key sections or foundational skills for this track are missing. Review the action plan below.";
+  }
+
+  // 4. Profession Specific Tailored Advice
+  const adviceList = document.getElementById('resAdviceList');
+  adviceList.innerHTML = "";
+  
+  // Dynamic recommendations
+  const dynamicTips = [...targetProf.advice];
+  if (coreMissing.length > 0) {
+    dynamicTips.unshift(`Incorporate proof of missing core proficiencies: ${coreMissing.slice(0, 4).join(", ")}.`);
+  }
+  if (!emailFound && !inputEmail) {
+    dynamicTips.push("Ensure your email and contact information are clearly placed at the top of the first page.");
+  }
+  if (words.length < 180) {
+    dynamicTips.push("Resume is very brief; add detailed bullet points quantifying project outcomes and scale.");
+  }
+
+  dynamicTips.forEach(tip => {
+    const li = document.createElement('li');
+    li.textContent = tip;
+    adviceList.appendChild(li);
+  });
+
+  // Reveal results container
+  document.getElementById('results-view').classList.add('active');
+  document.getElementById('results-view').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+}
+
+function animateRadialScore(target) {
+  const circle = document.getElementById('gaugeFillCircle');
+  const circumference = 427; // 2 * PI * 68
+  const offset = circumference - (target / 100) * circumference;
+  circle.style.strokeDashoffset = offset;
+
+  const numVal = document.getElementById('scoreNumVal');
+  let current = 0;
+  const step = Math.max(1, Math.round(target / 25));
+  const timer = setInterval(() => {
+    current = Math.min(target, current + step);
+    numVal.textContent = current;
+    if (current >= target) clearInterval(timer);
+  }, 22);
+}
+
+function switchResultTab(tabId) {
+  document.querySelectorAll('.res-tab-content').forEach(c => c.style.display = 'none');
+  document.querySelectorAll('.res-tab-btn').forEach(b => b.classList.remove('active'));
+
+  document.getElementById(tabId).style.display = 'block';
+  event.target.classList.add('active');
+}
+
+/* ==========================================================================
+   INITIALIZE ON PAGE LOAD
+   ========================================================================== */
+window.addEventListener('DOMContentLoaded', () => {
+  initAuth();
+});
+</script>
+</body>
+</html>
+```
